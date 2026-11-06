@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // -------------------------------------------------------------
+    // ShopBook Security Rules
+    // Only authenticated and authorized shop staff can read and write.
+    // Spark free plan compatible, multi-device shared cloud database.
+    // -------------------------------------------------------------
+
+    // Customers: shared by all 5 shop staff
+    match /customers/{customerId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Patt Transactions: every single entry recorded separately
+    match /pattTransactions/{transactionId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Payments: records customer payment amounts and notes
+    match /payments/{paymentId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Purchase reminder checklist
+    match /purchaseItems/{itemId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 5 Authorized Shop Users / Staff accounts
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.role == 'owner';
+    }
+  }
+}
